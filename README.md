@@ -12,4 +12,4 @@ public string SomeMethod(int someArgument)
 
 ```
 
-See my [blogpost]() for more information.
+See my [blogpost](http://www.correlatedcontent.com/blog/AOP-Caching-With-Castle-Windsor/) for more information.
