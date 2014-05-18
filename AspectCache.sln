@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectCache", "AspectCache.csproj", "{1BB5906B-B578-4F45-BE86-8DE0A1B33742}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectCache", "AspectCache\AspectCache.csproj", "{1BB5906B-B578-4F45-BE86-8DE0A1B33742}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectCache.Tests", "..\AspectCache.Tests\AspectCache.Tests.csproj", "{4F562C1E-9E3B-4F70-A3F2-00F8BA3CACA7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspectCache.Tests", "AspectCache.Tests\AspectCache.Tests.csproj", "{4F562C1E-9E3B-4F70-A3F2-00F8BA3CACA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
