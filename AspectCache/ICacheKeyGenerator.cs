@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 
 namespace AspectCache
 {
@@ -6,5 +7,6 @@ namespace AspectCache
     {
         string GenerateCacheKey(MethodInfo method, object[] arguments = null);
         string GeneratePartialCacheKey(MethodInfo method);
+        string GeneratePartialCacheKey(Type type);
     }
 }

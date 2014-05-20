@@ -1,5 +1,4 @@
 ﻿using Castle.Core.Configuration;
-using Castle.DynamicProxy;
 using Castle.MicroKernel;
 using Castle.MicroKernel.Registration;
 using Castle.MicroKernel.Resolvers.SpecializedResolvers;
@@ -16,7 +15,8 @@ namespace AspectCache
             kernel.Register(
                 Component.For<ICacheProvider>().ImplementedBy<DefaultCacheProvider>(),
                 Component.For<ICacheKeyGenerator>().ImplementedBy<DefaultCacheKeyGenerator>(),
-                Classes.FromThisAssembly().BasedOn<IInterceptor>()
+                Component.For<CacheInterceptor>(),
+                Component.For<BustCacheInterceptor>()
             );
         }
 

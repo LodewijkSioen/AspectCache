@@ -1,49 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Castle.DynamicProxy;
 
 namespace AspectCache.Tests
 {
-    public class DummyClass : IDummyInterface
+    public static class Randomizer
+    {
+        static readonly Random Random = new Random();
+
+        public static int GetValue()
+        {
+            return Random.Next();
+        }
+    }
+
+    public class DummyClass
     {
         public List<String> MethodsCalled = new List<string>();
 
-        public virtual DateTime UnCachedMethod()
+        public virtual int UnCachedMethod()
         {
             MethodsCalled.Add("UnCachedMethod");
-            return DateTime.Now;
+            return Randomizer.GetValue();
         }
 
         [Cached]
-        public virtual DateTime CachedMethod()
+        public virtual int CachedMethod()
         {
             MethodsCalled.Add("CachedMethod");
-            return DateTime.Now;
+            return Randomizer.GetValue();
+        }
+
+        [Cached(CacheRegion = "region")]
+        public virtual int CachedMethodWithRegion()
+        {
+            MethodsCalled.Add("CachedMethodWithRegion");
+            return Randomizer.GetValue();
         }
 
         [Cached(TimeoutInMinutes = 5, CacheKeyGenerator = typeof(DummyCacheKeyGenerator), CacheRegion = "region")]
-        public virtual DateTime CachedMethodWithSettings(string argumentOne, int argumentTwo)
+        public virtual int CachedMethodWithSettings(string argumentOne, int argumentTwo)
         {
             MethodsCalled.Add("CachedMethodWithSettings");
-            return DateTime.Now;
+            return Randomizer.GetValue();
         }
 
-        [Cached]
-        public DateTime CachedInterfaceMethod()
-        {
-            MethodsCalled.Add("CachedInterfaceMethod");
-            return DateTime.Now;
-        }
-
-        [BustCache]
-        public void BustClassCache()
+        [BustCache(CacheRegion = "region")]
+        public virtual void BustClassCache()
         {
             MethodsCalled.Add("BustClassCache");
         }
 
         [BustCache(MethodName = "CachedMethod")]
-        public void BustMethodCache()
+        public virtual void BustMethodCache()
         {
             MethodsCalled.Add("BustMethodCache");
         }
@@ -51,14 +60,41 @@ namespace AspectCache.Tests
 
     public interface IDummyInterface
     {
-        DateTime CachedInterfaceMethod();
+        int CachedInterfaceMethod();
+    }
+
+    public class CrashingDummyClass
+    {
+        [Cached]
+        public int CachedMethod()
+        {
+            return Randomizer.GetValue();
+        }
+    }
+
+    public class CrashingDummyClassWithInterface : IDummyInterface
+    {
+        [Cached]
+        public int CachedInterfaceMethod()
+        {
+            return Randomizer.GetValue();
+        }
+    }
+
+    public class NonCrashingDummyClassWithInterface : IDummyInterface
+    {
+        [Cached]
+        public virtual int CachedInterfaceMethod()
+        {
+            return Randomizer.GetValue();
+        }
     }
 
     public class UnCachedDummyClass
     {
-        public DateTime UnAttributedMethod()
+        public int UnAttributedMethod()
         {
-            return DateTime.Now;
+            return Randomizer.GetValue();
         }
     }
 
@@ -123,7 +159,12 @@ namespace AspectCache.Tests
 
         public string GeneratePartialCacheKey(System.Reflection.MethodInfo method)
         {
-            throw new NotImplementedException();
+            return _cacheKey;
+        }
+
+        public string GeneratePartialCacheKey(Type type)
+        {
+            return _cacheKey;
         }
     }
 }

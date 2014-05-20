@@ -46,14 +46,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BustCacheAttribute.cs" />
+    <Compile Include="BustCacheInterceptor.cs" />
     <Compile Include="CachedAttribute.cs" />
     <Compile Include="CacheFacility.cs" />
     <Compile Include="CacheInterceptor.cs" />
     <Compile Include="DefaultCacheKeyGenerator.cs" />
     <Compile Include="DefaultCacheProvider.cs" />
+    <Compile Include="Extensions.cs" />
     <Compile Include="ICacheKeyGenerator.cs" />
     <Compile Include="ICacheProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RequireBustCacheContributor.cs" />
     <Compile Include="RequireCachingContributor.cs" />
   </ItemGroup>
   <ItemGroup>
