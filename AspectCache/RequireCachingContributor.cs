@@ -7,6 +7,16 @@ using Castle.MicroKernel.ModelBuilder;
 
 namespace AspectCache
 {
+    public class RequireBustCacheContributor : IContributeComponentModelConstruction
+    {
+        public void ProcessModel(IKernel kernel, ComponentModel model)
+        {
+            var cachedMethods = model.Implementation.GetMethods().Where(m => AttributesUtil.GetAttribute<BustCacheAttribute>(m) != null).ToList();
+
+            model.Interceptors.AddIfNotInCollection(InterceptorReference.ForType<BustCacheInterceptor>());
+        }
+    }
+
     public class RequireCachingContributor : IContributeComponentModelConstruction
     {
         public void ProcessModel(IKernel kernel, ComponentModel model)

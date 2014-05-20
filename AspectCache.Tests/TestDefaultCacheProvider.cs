@@ -7,39 +7,58 @@ namespace AspectCache.Tests
     [TestFixture]
     public class TestDefaultCacheProvider
     {
+        ICacheProvider _provider;
+        MemoryCache _store;
+
+        [SetUp]
+        public void Setup()
+        {
+            _store = new MemoryCache("Test");
+            _provider = new DefaultCacheProvider(_store);
+        }
+
+        [TearDown]
+        public void Teardown()
+        {
+            MemoryCache.Default.Remove("test");
+            _store.Dispose();
+        }
+
         [Test]
-        public void TestDefaultMemoryCacheUsage()
+        public void TestUsage()
         {
-            var defaultCache = new DefaultCacheProvider();
+            _provider.Add("test", "value", DateTimeOffset.MaxValue, "region");
 
-            defaultCache.Add("test", "value", DateTimeOffset.MaxValue, "region");
-
-            AssertCacheUsage(defaultCache);
-            Assert.That(MemoryCache.Default.Get("[region]test"), Is.EqualTo("value"));
-            
-            CleanDefaultCache();
-
-            var specificCache = new DefaultCacheProvider(new MemoryCache("Test"));
-
-            specificCache.Add("test", "value", DateTimeOffset.MaxValue, "region");
-
-            AssertCacheUsage(specificCache);
-            Assert.That(MemoryCache.Default.Contains("[region]test"), Is.False);
+            Assert.That(_provider.Contains("test", "region"), Is.True);
+            Assert.That(_provider.Get("test", "region"), Is.EqualTo("value"));
         }
 
-        private void CleanDefaultCache()
+        [Test]
+        public void TestRemoveFromCache()
         {
-            foreach (var cacheItem in MemoryCache.Default)
-            {
-                MemoryCache.Default.Remove(cacheItem.Key);
-            }
+            _provider.Add("test", "value", DateTimeOffset.MaxValue, "region");
+            Assert.That(_store.Get("[region]test"), Is.EqualTo("value"));
+
+            _provider.Remove("test", "region");
+            Assert.That(_store.Contains("[region]test"), Is.False);
         }
 
-
-        private static void AssertCacheUsage(ICacheProvider cache)
+        [Test]
+        public void TestRemoveStartingWith()
         {
-            Assert.That(cache.Contains("test", "region"), Is.True);
-            Assert.That(cache.Get("test", "region"), Is.EqualTo("value"));
+            _provider.Add("test", "value", DateTimeOffset.MaxValue, "region");
+            Assert.That(_store.Get("[region]test"), Is.EqualTo("value"));
+
+            _provider.RemoveAllStartingWith("t", "region");
+            Assert.That(_store.Contains("[region]test"), Is.False);
+        }
+
+        [Test]
+        public void TestDefaultConstructor()
+        {
+            var provider = new DefaultCacheProvider();
+            provider.Add("test", "value", DateTimeOffset.MaxValue);
+            Assert.That(MemoryCache.Default["test"], Is.EqualTo("value"));
         }
     }
 }

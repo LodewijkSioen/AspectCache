@@ -35,6 +35,18 @@ namespace AspectCache.Tests
             MethodsCalled.Add("CachedInterfaceMethod");
             return DateTime.Now;
         }
+
+        [BustCache]
+        public void BustClassCache()
+        {
+            MethodsCalled.Add("BustClassCache");
+        }
+
+        [BustCache(MethodName = "CachedMethod")]
+        public void BustMethodCache()
+        {
+            MethodsCalled.Add("BustMethodCache");
+        }
     }
 
     public interface IDummyInterface
@@ -74,6 +86,17 @@ namespace AspectCache.Tests
                 Value = value
             });
         }
+        
+        public void Remove(string cacheKey, string cacheRegion = null)
+        {
+            var item = Items.First(i => i.CacheKey == cacheKey && i.CacheRegion == cacheRegion);
+            Items.Remove(item);
+        }
+
+        public void RemoveAllStartingWith(string cacheKey, string cacheRegion = null)
+        {
+            Items.RemoveAll(i => i.CacheKey.StartsWith(cacheKey) && i.CacheRegion == cacheRegion);
+        }
 
         public class DummyCacheItem
         {
@@ -93,9 +116,14 @@ namespace AspectCache.Tests
             _cacheKey = cacheKey;
         }
 
-        public string GenerateCacheKey(IInvocation invocation)
+        public string GenerateCacheKey(System.Reflection.MethodInfo method, object[] arguments)
         {
             return _cacheKey;
+        }
+
+        public string GeneratePartialCacheKey(System.Reflection.MethodInfo method)
+        {
+            throw new NotImplementedException();
         }
     }
 }

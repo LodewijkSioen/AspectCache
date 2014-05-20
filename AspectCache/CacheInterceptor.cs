@@ -6,6 +6,51 @@ using Castle.DynamicProxy;
 
 namespace AspectCache
 {
+    public class BustCacheInterceptor : IInterceptor
+    {
+        private readonly IEnumerable<ICacheKeyGenerator> _cacheKeyGenerators;
+        private readonly ICacheProvider _cache;
+
+        public BustCacheInterceptor(ICacheProvider cache, IEnumerable<ICacheKeyGenerator> cacheKeyGenerators)
+        {
+            _cache = cache;
+            _cacheKeyGenerators = cacheKeyGenerators;
+        }
+
+        public void Intercept(IInvocation invocation)
+        {
+            var bustCacheAttribute = invocation.Method.GetAttribute<BustCacheAttribute>();
+
+            if (bustCacheAttribute == null)
+            {
+                invocation.Proceed();
+                return;
+            }
+
+            invocation.Proceed();
+            BustCache(bustCacheAttribute, invocation);
+            return;
+        }
+
+        public void BustCache(BustCacheAttribute attribute, IInvocation invocation)
+        {
+            var cacheKeyGenerator = _cacheKeyGenerators.FirstOrDefault(c => c.GetType() == attribute.CacheKeyGenerator) ?? new DefaultCacheKeyGenerator();
+
+            var method = invocation.TargetType.GetMethod(attribute.MethodName);
+
+            if (method.GetParameters().Any())
+            {
+                var cacheKey = cacheKeyGenerator.GeneratePartialCacheKey(method);
+                _cache.RemoveAllStartingWith(cacheKey, attribute.CacheRegion);
+            }
+            else
+            {
+                var cacheKey = cacheKeyGenerator.GenerateCacheKey(method);
+                _cache.Remove(cacheKey, attribute.CacheRegion);
+            }
+        }
+    }
+
     public class CacheInterceptor : IInterceptor
     {
         private readonly IEnumerable<ICacheKeyGenerator> _cacheKeyGenerators;
@@ -27,18 +72,24 @@ namespace AspectCache
                 return;
             }
 
-            var cacheKeyGenerator = _cacheKeyGenerators.FirstOrDefault(c => c.GetType() == cacheAttribute.CacheKeyGenerator) ?? new DefaultCacheKeyGenerator();
-            var cacheKey = cacheKeyGenerator.GenerateCacheKey(invocation);
+            FillCache(cacheAttribute, invocation);
+            return;
+        }        
 
-            if (_cache.Contains(cacheKey, cacheAttribute.CacheRegion))
+        public void FillCache(CachedAttribute attribute, IInvocation invocation)
+        {
+            var cacheKeyGenerator = _cacheKeyGenerators.FirstOrDefault(c => c.GetType() == attribute.CacheKeyGenerator) ?? new DefaultCacheKeyGenerator();
+            var cacheKey = cacheKeyGenerator.GenerateCacheKey(invocation.Method, invocation.Arguments);
+
+            if (_cache.Contains(cacheKey, attribute.CacheRegion))
             {
-                invocation.ReturnValue = _cache.Get(cacheKey, cacheAttribute.CacheRegion);
+                invocation.ReturnValue = _cache.Get(cacheKey, attribute.CacheRegion);
             }
             else
             {
                 invocation.Proceed();
-                var expiration = cacheAttribute.TimeoutInMinutes == 0 ? DateTimeOffset.MaxValue : DateTimeOffset.Now.AddMinutes(cacheAttribute.TimeoutInMinutes);
-                _cache.Add(cacheKey, invocation.ReturnValue, expiration, cacheAttribute.CacheRegion);
+                var expiration = attribute.TimeoutInMinutes == 0 ? DateTimeOffset.MaxValue : DateTimeOffset.Now.AddMinutes(attribute.TimeoutInMinutes);
+                _cache.Add(cacheKey, invocation.ReturnValue, expiration, attribute.CacheRegion);
             }
         }
     }

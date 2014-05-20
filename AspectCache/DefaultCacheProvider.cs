@@ -34,5 +34,22 @@ namespace AspectCache
         {
             _cache.Add(ComposeCacheKey(cacheKey, cacheRegion), value, absoluteExpiration);
         }
+
+        public void Remove(string cacheKey, string cacheRegion = null)
+        {
+            _cache.Remove(ComposeCacheKey(cacheKey, cacheRegion));
+        }
+
+        public void RemoveAllStartingWith(string cacheKey, string cacheRegion = null)
+        {
+            var compositeCacheKey = ComposeCacheKey(cacheKey, cacheRegion);
+            foreach (var item in _cache)
+            {
+                if (item.Key.StartsWith(compositeCacheKey))
+                {
+                    _cache.Remove(item.Key);
+                }
+            }
+        }
     }
 }

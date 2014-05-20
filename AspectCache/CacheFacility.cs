@@ -12,10 +12,11 @@ namespace AspectCache
         {
             kernel.Resolver.AddSubResolver(new CollectionResolver(kernel));
             kernel.ComponentModelBuilder.AddContributor(new RequireCachingContributor());
+            kernel.ComponentModelBuilder.AddContributor(new RequireBustCacheContributor());
             kernel.Register(
                 Component.For<ICacheProvider>().ImplementedBy<DefaultCacheProvider>(),
-                Component.For<IInterceptor>().ImplementedBy<CacheInterceptor>(),
-                Component.For<ICacheKeyGenerator>().ImplementedBy<DefaultCacheKeyGenerator>()
+                Component.For<ICacheKeyGenerator>().ImplementedBy<DefaultCacheKeyGenerator>(),
+                Classes.FromThisAssembly().BasedOn<IInterceptor>()
             );
         }
 

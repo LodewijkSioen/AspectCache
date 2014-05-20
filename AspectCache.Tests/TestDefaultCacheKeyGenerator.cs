@@ -15,53 +15,21 @@ namespace AspectCache.Tests
 
             var type = typeof (DummyClass);
             var method = type.GetMethod("CachedMethodWithSettings");
-            var key = generator.GenerateCacheKey(new DummyInvocation(type, method, new object[]{"test", 1}));
+            var key = generator.GenerateCacheKey(method, new object[]{"test", 1});
 
             Assert.That(key, Is.EqualTo("AspectCache.Tests.DummyClass.CachedMethodWithSettings(test, 1)"));
         }
 
-        class DummyInvocation : IInvocation
+        [Test]
+        public void APartialCacheKeyIsGeneratedFromTheMethodSignature()
         {
-            public DummyInvocation(Type targetType, MethodInfo method, object[] arguments)
-            {
-                TargetType = targetType;
-                Method = method;
-                Arguments = arguments;
-            }
+            var generator = new DefaultCacheKeyGenerator();
 
-            public object GetArgumentValue(int index)
-            {
-                throw new NotImplementedException();
-            }
+            var type = typeof(DummyClass);
+            var method = type.GetMethod("CachedMethodWithSettings");
+            var key = generator.GeneratePartialCacheKey(method);
 
-            public MethodInfo GetConcreteMethod()
-            {
-                throw new NotImplementedException();
-            }
-
-            public MethodInfo GetConcreteMethodInvocationTarget()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Proceed()
-            {
-                throw new NotImplementedException();
-            }
-
-            public void SetArgumentValue(int index, object value)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object[] Arguments { get; private set; }
-            public Type[] GenericArguments { get; private set; }
-            public object InvocationTarget { get; private set; }
-            public MethodInfo Method { get; private set; }
-            public MethodInfo MethodInvocationTarget { get; private set; }
-            public object Proxy { get; private set; }
-            public object ReturnValue { get; set; }
-            public Type TargetType { get; private set; }
+            Assert.That(key, Is.EqualTo("AspectCache.Tests.DummyClass.CachedMethodWithSettings"));
         }
     }
 }

@@ -58,6 +58,25 @@ namespace AspectCache.Tests
         }
 
         [Test]
+        public void BustTheCacheForTheEntireClass()
+        {
+            using (var container = CreateContainer())
+            {
+                var dummy = container.Resolve<DummyClass>();
+                var one = dummy.CachedMethod();
+                var two = dummy.CachedMethodWithSettings("one", 2);
+
+                Assert.That(dummy.CachedMethod(), Is.EqualTo(one));
+                Assert.That(dummy.CachedMethodWithSettings("one", 2), Is.EqualTo(two));
+
+                dummy.BustClassCache();
+
+                Assert.That(dummy.CachedMethod(), Is.Not.EqualTo(one));
+                Assert.That(dummy.CachedMethodWithSettings("one", 2), Is.Not.EqualTo(two));
+            }
+        }
+
+        [Test]
         public void HowToOverrideTheCacheProvider()
         {
             using (var container = CreateContainer())

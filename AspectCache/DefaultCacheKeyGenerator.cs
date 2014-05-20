@@ -1,13 +1,18 @@
 ﻿using System;
-using Castle.DynamicProxy;
+using System.Reflection;
 
 namespace AspectCache
 {
     public class DefaultCacheKeyGenerator : ICacheKeyGenerator
     {
-        public string GenerateCacheKey(IInvocation invocation)
+        public string GenerateCacheKey(MethodInfo method, object[] arguments = null)
         {
-            return String.Concat(invocation.TargetType.FullName, ".", invocation.Method.Name, "(", String.Join(", ", invocation.Arguments), ")");
+            return String.Concat(method.DeclaringType.FullName, ".", method.Name, "(", String.Join(", ", arguments), ")");
+        }
+
+        public string GeneratePartialCacheKey(MethodInfo method)
+        {
+            return String.Concat(method.DeclaringType.FullName, ".", method.Name);
         }
     }
 }
