@@ -32,7 +32,14 @@ namespace AspectCache
 
         public void Add(string cacheKey, object value, DateTimeOffset absoluteExpiration, string cacheRegion = null)
         {
-            _cache.Add(ComposeCacheKey(cacheKey, cacheRegion), value, absoluteExpiration);
+            if (value == null)
+            {
+                _cache.Remove(ComposeCacheKey(cacheKey, cacheRegion));
+            }
+            else
+            {
+                _cache.Add(ComposeCacheKey(cacheKey, cacheRegion), value, absoluteExpiration);
+            }
         }
 
         public void Remove(string cacheKey, string cacheRegion = null)

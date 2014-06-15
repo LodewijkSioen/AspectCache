@@ -60,5 +60,16 @@ namespace AspectCache.Tests
             provider.Add("test", "value", DateTimeOffset.MaxValue);
             Assert.That(MemoryCache.Default["test"], Is.EqualTo("value"));
         }
+
+        [Test]
+        public void TestAddNullWillRemoveFromCache()
+        {
+            var provider = new DefaultCacheProvider();
+            provider.Add("test", "value", DateTimeOffset.MaxValue);
+            Assert.That(MemoryCache.Default["test"], Is.EqualTo("value"));
+
+            provider.Add("test", null, DateTimeOffset.MaxValue);
+            Assert.That(MemoryCache.Default["test"], Is.EqualTo(null));
+        }
     }
 }
